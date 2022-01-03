@@ -1,10 +1,8 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from . import views
-
-router = DefaultRouter()
-router.register('UserModel', views.UserViewSet)
+from rest_framework import serializers
+from rest_framework.serializers import Serializer
+from .views import UserViewSet
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('user_info', UserViewSet.as_view({'get':'list'})),
 ]

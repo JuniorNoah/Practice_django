@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'text',
     'headtext',
     'subtext',
+    'main',
     'rest_framework',
 ]
 

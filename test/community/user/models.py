@@ -11,4 +11,4 @@ class UserModel(models.Model) :
     
     class Meta :
         db_table = "User"
-        ordering = ["login_id", "login_pw", "email", "name", "sex", "nickname"]
+        ordering = ["id", "login_id", "login_pw", "email", "name", "sex", "nickname"]
