@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'testapp',
     'select_sex',
+    #'comment',
+    'headtext',
 ]
 
 MIDDLEWARE = [

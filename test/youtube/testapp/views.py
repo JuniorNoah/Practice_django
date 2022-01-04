@@ -19,7 +19,7 @@ class UserListView(APIView) :
 class UserDetailView(APIView) :
     def get(self, request, user_id) :
         model = UserModel.objects.filter(id=user_id)
-        serializer = UserSerializer(UserModel)
+        serializer = UserSerializer(model, many=True)
         return Response(serializer.data)
         
     def put(self, request, user_id) :

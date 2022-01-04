@@ -19,7 +19,7 @@ class SelectListView(APIView) :
 class SelectDetailView(APIView) :
     def get(self, request, sex_id) :
         model = SelectSexModel.objects.filter(id=sex_id)
-        serializer = SelectSexSerializer(SelectSexModel)
+        serializer = SelectSexSerializer(model, many=True)
         return Response(serializer.data)
         
     def put(self, request, sex_id) :
