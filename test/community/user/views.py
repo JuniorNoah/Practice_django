@@ -11,12 +11,12 @@ class UserViewSet(viewsets.ModelViewSet) :
     def get_queryset(self) :
         return UserModel.objects.all()
     
-    def user_list(slef, request) :
+    def user_list(self, request) :
         if request.method == 'GET' :
             serializer = UserSerializer(many=True)
             return Response(serializer)
         elif request.mothod == 'POST' :
-            serializer = UserSerializer(self.get_queryset(), many=True)            )
+            serializer = UserSerializer(self.get_queryset(), many=True)
             if serializer.is_valid() :
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)            
