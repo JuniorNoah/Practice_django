@@ -6,4 +6,5 @@ urlpatterns = [
     path('user/', include('testapp.urls')),
     path('sex/', include('select_sex.urls')),
     path('headtext/', include('headtext.urls')),
+    path('text/', include('text.urls')),
 ]

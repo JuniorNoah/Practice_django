@@ -1,3 +1,4 @@
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import SelectSexSerializer
@@ -23,13 +24,14 @@ class SelectDetailView(APIView) :
         return Response(serializer.data)
         
     def put(self, request, sex_id) :
-        model = SelectSexModel.objects.filter(id=sex_id)
+        model = SelectSexModel.objects.filter(id=sex_id).first()
         serializer = SelectSexSerializer(model, data=request.data)
         if serializer.is_valid() :
+            serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
         
-    def delete(self, sex_id) :
+    def delete(self, request, sex_id) :
         model = SelectSexModel.objects.filter(id=sex_id)
         model.delete()
         serializer = SelectSexSerializer(model, many=True)

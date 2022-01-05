@@ -24,13 +24,14 @@ class HeadDetailView(APIView) :
         return Response(serializer.data)
         
     def put(self, request, head_id) :
-        model = HeadTextModel.objects.filter(id=head_id)
+        model = HeadTextModel.objects.filter(id=head_id).first()
         serializer = HeadtextSerializer(model, data=request.data)
         if serializer.is_valid() :
+            serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
         
-    def delete(self, head_id) :
+    def delete(self, request, head_id) :
         model = HeadTextModel.objects.filter(id=head_id)
         model.delete()
         serializer = HeadtextSerializer(model, many=True)

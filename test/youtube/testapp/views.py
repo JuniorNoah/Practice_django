@@ -23,13 +23,14 @@ class UserDetailView(APIView) :
         return Response(serializer.data)
         
     def put(self, request, user_id) :
-        model = UserModel.objects.filter(id=user_id)
+        model = UserModel.objects.filter(id=user_id).first()
         serializer = UserSerializer(model, data=request.data)
         if serializer.is_valid() :
+            serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
         
-    def delete(self, user_id) :
+    def delete(self, request, user_id) :
         model = UserModel.objects.filter(id=user_id)
         model.delete()
         serializer = UserSerializer(model, many=True)
