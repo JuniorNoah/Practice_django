@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import TextDetailView, TextListView
+from . import views
 
 urlpatterns = [
-    path('tools/', TextListView.as_view()),
-    path('tools/<int:text_id>/', TextDetailView.as_view()),
+    path('crud/', views.text_list),
+    path('crud/<int:pk>/', views.text_datail),
 ]

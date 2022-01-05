@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import HeadDetailView, HeadListView
+from . import views
 
 urlpatterns = [
-    path('tools/', HeadListView.as_view()),
-    path('tools/<int:head_id>/', HeadDetailView.as_view()),
+    path('crud/', views.head_list),
+    path('crud/<int:pk>/', views.head_datail),
 ]

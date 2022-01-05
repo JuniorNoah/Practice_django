@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import BlackListView, BlackDetailView
+from . import views
 
 urlpatterns = [
-    path('lists/', BlackListView.as_view()),
-    path('lists/<int:user_id>/', BlackDetailView.as_view()),
+    path('lists/', views.black_list),
+    path('list/<int:pk>/', views.black_datail),
 ]

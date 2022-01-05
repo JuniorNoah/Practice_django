@@ -1,37 +1,18 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .serializers import CommSerializer
+from rest_framework.viewsets import ModelViewSet
 from .models import CommunityModel
+from .serializers import CommunitySerializer
 
-class CommListView(APIView) :
-    def get(self, request) :
-        model = CommunityModel.objects.all()
-        serializer = CommSerializer(model, many=True)
-        return Response(serializer.data)
+class CommunityViewSet(ModelViewSet) :
+    queryset = CommunityModel.objects.all()
+    serializer_class = CommunitySerializer
+    
+community_list = CommunityViewSet.as_view({
+    'get': 'list',
+    'post': 'create',
+})
 
-    def post(self, request) :
-        serializer = CommSerializer(data=request.data)
-        if serializer.is_valid() :
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-
-class CommDetailView(APIView) :
-    def get(self, request, comm_id) :
-        model = CommunityModel.objects.filter(id=comm_id)
-        serializer = CommSerializer(model, many=True)
-        return Response(serializer.data)
-        
-    def put(self, request, comm_id) :
-        model = CommunityModel.objects.filter(id=comm_id).first()
-        serializer = CommSerializer(model, data=request.data)
-        if serializer.is_valid() :
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-        
-    def delete(self, request, comm_id) :
-        model = CommunityModel.objects.filter(id=comm_id)
-        model.delete()
-        serializer = CommSerializer(model, many=True)
-        return Response(serializer.data)
+community_datail = CommunityViewSet.as_view({
+    'get':'retrieve',
+    'put':'update',
+    'delete':'destroy',
+})

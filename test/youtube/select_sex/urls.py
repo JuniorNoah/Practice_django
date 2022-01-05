@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import SelectListView, SelectDetailView
+from . import views
 
 urlpatterns = [
-    path('tools/', SelectListView.as_view()),
-    path('tools/<int:sex_id>/', SelectDetailView.as_view())
+    path('crud/', views.select_list),
+    path('crud/<int:pk>/', views.select_datail),
 ]

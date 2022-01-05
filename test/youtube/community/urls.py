@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import CommListView, CommDetailView
+from . import views
 
 urlpatterns = [
-    path('tools/', CommListView.as_view()),
-    path('tools/<int:comm_id>/', CommDetailView.as_view()),
+    path('crud/', views.community_list),
+    path('crud/<int:pk>/', views.community_datail),
 ]

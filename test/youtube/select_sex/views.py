@@ -1,38 +1,18 @@
-from rest_framework.parsers import JSONParser
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .serializers import SelectSexSerializer
+from rest_framework.viewsets import ModelViewSet
 from .models import SelectSexModel
+from .serializers import SelectSexSerializer
 
-class SelectListView(APIView) :
-    def get(self, request) :
-        model = SelectSexModel.objects.all()
-        serializer = SelectSexSerializer(model, many=True)
-        return Response(serializer.data)
+class SelectSexViewSet(ModelViewSet) :
+    queryset = SelectSexModel.objects.all()
+    serializer_class = SelectSexSerializer
+    
+select_list = SelectSexViewSet.as_view({
+    'get': 'list',
+    'post': 'create',
+})
 
-    def post(self, request) :
-        serializer = SelectSexSerializer(data=request.data)
-        if serializer.is_valid() :
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-
-class SelectDetailView(APIView) :
-    def get(self, request, sex_id) :
-        model = SelectSexModel.objects.filter(id=sex_id)
-        serializer = SelectSexSerializer(model, many=True)
-        return Response(serializer.data)
-        
-    def put(self, request, sex_id) :
-        model = SelectSexModel.objects.filter(id=sex_id).first()
-        serializer = SelectSexSerializer(model, data=request.data)
-        if serializer.is_valid() :
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-        
-    def delete(self, request, sex_id) :
-        model = SelectSexModel.objects.filter(id=sex_id)
-        model.delete()
-        serializer = SelectSexSerializer(model, many=True)
-        return Response(serializer.data)
+select_datail = SelectSexViewSet.as_view({
+    'get':'retrieve',
+    'put':'update',
+    'delete':'destroy',
+})

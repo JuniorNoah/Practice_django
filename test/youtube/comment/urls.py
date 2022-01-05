@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import CommentListView,  CommentDetailView
+from . import views
+
 urlpatterns = [
-    path('tools/', CommentListView.as_view()),
-    path('tools/<int:comment_id>', CommentDetailView.as_view()),
+    path('crud/', views.comment_list),
+    path('crud/<int:pk>/', views.comment_datail),
 ]
