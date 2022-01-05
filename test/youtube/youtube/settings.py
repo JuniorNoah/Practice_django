@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'text',
     'black',
     'community',
+    'login',
 ]
 
 MIDDLEWARE = [

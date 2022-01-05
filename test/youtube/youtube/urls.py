@@ -10,4 +10,5 @@ urlpatterns = [
     path('blacklist/', include('black.urls')),
     path('comment/', include('comment.urls')),
     path('community/', include('community.urls')),
+    path('login/', include('login.urls')),
 ]
