@@ -47,13 +47,14 @@ class Loginview(APIView) :
         pw = request.data['login_pw']
         data_id = UserModel.objects.filter(login_id=id)
         
+        # login
         if data_id.exists() :
             data_pw = UserModel.objects.filter(login_pw=pw)
             if data_pw.exists() :
                 model = UserModel.objects.get(login_id=id)
                 serializer = LoginSerializer(model, data=request.data)
                 if serializer.is_valid() :
-                    serializer.save()
+                    model['connection'] = True
                     return Response(serializer.data, status=201)
 
         return redirect(reverse('login'))            
