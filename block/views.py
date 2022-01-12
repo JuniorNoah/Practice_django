@@ -10,7 +10,7 @@ class BlockListView(APIView) :
     def get(self, request) :
         model = Blacklist.objects.all()
         serializer = BlockSerializer(model, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=201)
 
     def post(self, request) :
         serializer = BlockSerializer(data=request.data)

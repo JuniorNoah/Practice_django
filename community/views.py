@@ -1,7 +1,5 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import redirect
-from django.urls import reverse
 from user.models import UserModel
 from block.models import Blacklist
 from .serializers import HeadSerializer, PostSerializer, CommentSerializer, CommunitySerializer
@@ -11,14 +9,14 @@ class HeadListView(APIView) :
     def get(self, request) :
         model = HeadModel.objects.all()
         serializer = HeadSerializer(model, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=201)
 
     def post(self, request) :
-        user_id = UserModel.objects.filter(connection=True)['id']
+        user = UserModel.objects.filter(connection=True).first()
         community_id = request.data['head_community_id']
         
-        admin_id = CommunityModel.objects.filter(id=community_id)['community_admin_id']
-        if user_id == admin_id :
+        admin = CommunityModel.objects.filter(id=community_id)
+        if user.id == admin.filter(id=community_id).first().community_admin_id.id :
             serializer = HeadSerializer(data=request.data)
             if serializer.is_valid() :
                 serializer.save()
@@ -33,67 +31,72 @@ class HeadDetailView(APIView) :
         return Response(serializer.data)
         
     def put(self, request, head_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']
-        community_id = request.data['head_community_id']
+        user = UserModel.objects.filter(connection=True).first()
+        head = HeadModel.objects.filter(id=head_id)
+        admin = head.filter(id=head_id).first().head_community_id
         
-        admin_id = CommunityModel.objects.filter(id=community_id)['community_admin_id']
-        if user_id == admin_id :
+        if user.id == admin.id :
             model = HeadModel.objects.filter(id=head_id).first()
-            serializer = HeadSerializer(model, data=request.data)
+            serializer = HeadSerializer(model, data=request.data, partial=True)
             if serializer.is_valid() :
                 serializer.save()
                 return Response(serializer.data, status=201)
             return Response(serializer.errors, status=400)
+        return Response('Not permission', status=401)
         
     def delete(self, request, head_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']
-        community_id = request.data['head_community_id']
+        user = UserModel.objects.filter(connection=True).first()
+        head = HeadModel.objects.filter(id=head_id)
+        admin = head.filter(id=head_id).first().head_community_id
         
-        admin_id = CommunityModel.objects.filter(id=community_id)['community_admin_id']
-        if user_id == admin_id :
+        if user.id ==  admin.id:
             model = HeadModel.objects.filter(id=head_id)
             model.delete()
             serializer = HeadSerializer(model, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=201)
 
 class PostListView(APIView) :
     def get(self, request) :
         model = PostModel.objects.all()
         serializer = PostSerializer(model, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=201)
 
     def post(self, request) :
-        user_id = UserModel.objects.filter(connection=True)['id']
-        serializer = PostSerializer(data=request.data, partial=True, post_author_id=user_id)
-        
+        user = UserModel.objects.filter(connection=True).first()
+        serializer = PostSerializer(data=request.data, partial=True)
         if serializer.is_valid() :
             serializer.save()
+            serializer.save(post_author_id=user)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
 class PostDetailView(APIView) :
     def get(self, request, post_id) :
+        model = PostModel.objects.get(id=post_id)
+        model.view_count += 1
+        model.save()
+        
         model = PostModel.objects.filter(id=post_id)
         serializer = PostSerializer(model, many=True)
         return Response(serializer.data)
         
     def put(self, request, post_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']       
-        author_id = PostModel.objects.filter(id=post_id)['post_author_id'].first()
+        user = UserModel.objects.filter(connection=True).first()
+        post = PostModel.objects.filter(id=post_id)
         
-        if user_id == author_id :
-            model = PostModel.objects.filter(id=user_id).first()
-            serializer = PostSerializer(model, data=request.data)
+        if user.id == post.filter(id=post_id).first().post_author_id.id :
+            model = PostModel.objects.filter(id=user.id).first()
+            serializer = PostSerializer(model, data=request.data, partial=True)
             if serializer.is_valid() :
                 serializer.save()
                 return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=400)
         
     def delete(self, request, post_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']       
-        author_id = PostModel.objects.filter(id=post_id)['post_author_id'].first()
+        user = UserModel.objects.filter(connection=True).first()    
+        post = PostModel.objects.filter(id=post_id)
         
-        if user_id == author_id :
+        if user.id == post.filter(id=post_id).first().post_author_id.id :
             model = PostModel.objects.filter(id=post_id)
             model.delete()
             serializer = PostSerializer(model, many=True)
@@ -106,40 +109,41 @@ class CommentListView(APIView) :
         return Response(serializer.data)
 
     def post(self, request) :
-        user_id = UserModel.objects.filter(connection=True)['id']
-        serializer = CommentSerializer(data=request.data, partial=True, comment_author_id=user_id)
+        user = UserModel.objects.filter(connection=True).first()
+        serializer = CommentSerializer(data=request.data, partial=True)
         
         if serializer.is_valid() :
             serializer.save()
+            serializer.save(comment_author_id=user)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
 class CommentDetailView(APIView) :
     def get(self, request, comment_id) :
         model = CommentModel.objects.filter(id=comment_id)
-        serializer = HeadSerializer(model, many=True)
+        serializer = CommentSerializer(model, many=True)
         return Response(serializer.data)
         
     def put(self, request, comment_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']       
-        author_id = PostModel.objects.filter(id=comment_id)['post_author_id'].first()
+        user = UserModel.objects.filter(connection=True).first()   
+        comment = CommentModel.objects.filter(id=comment_id)
         
-        if user_id == author_id :
+        if user.id == comment.filter(id=comment_id).first().comment_post_id.id :
             model = CommentModel.objects.filter(id=comment_id).first()
-            serializer = HeadSerializer(model, data=request.data)
+            serializer = CommentSerializer(model, data=request.data, partial=True)
             if serializer.is_valid() :
                 serializer.save()
                 return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=400)
         
     def delete(self, request, comment_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']       
-        author_id = PostModel.objects.filter(id=comment_id)['post_author_id'].first()
+        user = UserModel.objects.filter(connection=True).first()
+        comment = CommentModel.objects.filter(id=comment_id)
         
-        if user_id == author_id :
+        if user.id == comment.filter(id=comment_id).first().comment_author_id.id :
             model = CommentModel.objects.filter(id=comment_id)
             model.delete()
-            serializer = HeadSerializer(model, many=True)
+            serializer = CommentSerializer(model, many=True)
             return Response(serializer.data)
 
 class CommunityListView(APIView) :
@@ -152,23 +156,19 @@ class CommunityListView(APIView) :
 
     def post(self, request) :    
         admin = request.data['admin_name']
-        
-        serializer = CommunitySerializer(data=request.data)
-        user = UserModel.objects.get(name=admin)
-
-        if serializer.is_valid() and admin == user :
+        serializer = CommunitySerializer(data=request.data, partial=True)
+        if serializer.is_valid() :
             serializer.save()
-            serializer.save(community_admin_id=user['id'])
             return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=400) 
 
 class CommunityDetailView(APIView) :
     def get(self, request, community_id) :
-        user_id = UserModel.objects.filter(connection=True)['id']
-        black = Blacklist.objects.filter(blacked_id=user_id, comm_id=community_id)
+        user = UserModel.objects.filter(connection=True).first()
+        black = Blacklist.objects.filter(blocked_id=user.id)
         
         if black.exists() :
-            return Response(400)
+            return Response('You are blocked this community', status=401)
         
         model = CommunityModel.objects.filter(id=community_id)
         serializer = CommunitySerializer(model, many=True)
@@ -177,8 +177,8 @@ class CommunityDetailView(APIView) :
     def delete(self, request, community_id) :
         user = UserModel.objects.filter(connection=True).first()
         model = CommunityModel.objects.filter(id=community_id)
-        if user == model['community_admin_id'] :
+        if user.id == model.filter(id=community_id).first().community_admin_id.id :
             model.delete()
             serializer = CommunitySerializer(model, many=True)
-            return Response(serializer.data)
-        return Response(status=401)
+            return Response(serializer.data, status=201)
+        return Response('Not permission', status=401)
